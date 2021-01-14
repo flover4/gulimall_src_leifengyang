@@ -8,7 +8,7 @@ pipeline {
   stages {
     stage('拉取代码') {
       steps {
-        git(url: 'https://gitee.com/leifengyang/gulimall.git', credentialsId: 'gitee-id', branch: 'master', changelog: true, poll: false)
+        git(url: 'https://github.com/flover4/gulimall_src_leifengyang.git', credentialsId: 'github-id', branch: 'master', changelog: true, poll: false)
         sh 'echo 正在构建 $PROJECT_NAME  版本号：$PROJECT_VERSION 将会提交给 $REGISTRY 镜像仓库'
         container('maven') {
           sh 'mvn clean install -Dmaven.test.skip=true -gs `pwd`/mvn-settings.xml'
@@ -67,11 +67,11 @@ pipeline {
             input(id: 'release-image-with-tag', message: '发布当前版本镜像吗?')
             sh 'docker tag  $REGISTRY/$DOCKERHUB_NAMESPACE/$PROJECT_NAME:SNAPSHOT-$BRANCH_NAME-$BUILD_NUMBER $REGISTRY/$DOCKERHUB_NAMESPACE/$PROJECT_NAME:$PROJECT_VERSION '
             sh 'docker push  $REGISTRY/$DOCKERHUB_NAMESPACE/$PROJECT_NAME:$PROJECT_VERSION '
-            withCredentials([usernamePassword(credentialsId: "$GITEE_CREDENTIAL_ID", passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
-                sh 'git config --global user.email "534096094@qq.com" '
-                sh 'git config --global user.name "leifengyang" '
+            withCredentials([usernamePassword(credentialsId: "$GITHUB_CREDENTIAL_ID", passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
+                sh 'git config --global user.email "liml.hz@gmail.com" '
+                sh 'git config --global user.name "flover4" '
                 sh 'git tag -a $PROJECT_NAME-$PROJECT_VERSION -m "$PROJECT_VERSION" '
-                sh 'git push http://$GIT_USERNAME:$GIT_PASSWORD@gitee.com/$GITEE_ACCOUNT/gulimall.git --tags --ipv4'
+                sh 'git push http://$GIT_USERNAME:$GIT_PASSWORD@github.com/$GITHUB_ACCOUNT/gulimall_src_leifengyang.git --tags --ipv4'
             }
 
         }
@@ -80,12 +80,12 @@ pipeline {
 
   }
   environment {
-    DOCKER_CREDENTIAL_ID = 'aliyun-hub-id'
-    GITEE_CREDENTIAL_ID = 'gitee-id'
+    DOCKER_CREDENTIAL_ID = 'dockerhub-id'
+    GITHUB_CREDENTIAL_ID = 'github-id'
     KUBECONFIG_CREDENTIAL_ID = 'demo-kubeconfig'
-    REGISTRY = 'registry.cn-hangzhou.aliyuncs.com'
-    DOCKERHUB_NAMESPACE = 'atguigumall'
-    GITEE_ACCOUNT = 'leifengyang'
+    REGISTRY = 'docker.io'
+    DOCKERHUB_NAMESPACE = 'flover4'
+    GITHUB_ACCOUNT = 'flover4'
     SONAR_CREDENTIAL_ID = 'sonar-qube'
     BRANCH_NAME = 'master'
   }
